@@ -62,14 +62,33 @@ class LLMService {
         return greetings.some(greeting => normalized.includes(greeting)) || /^((hi|hello|hey|hii|hiii)(\s|!|\.)*)$/.test(normalized);
     }
     static createFallbackAnswer(question, context) {
+        const normalizedQuestion = question.toLowerCase().trim();
+        const isSummaryRequest = normalizedQuestion.includes('summar') || normalizedQuestion.includes('overview') || normalizedQuestion.includes('about this document') || normalizedQuestion.includes('tell me about');
+        if (isSummaryRequest && context && context.trim()) {
+            const sentences = context
+                .split(/(?<=[.!?])\s+/)
+                .map(sentence => sentence.trim())
+                .filter(sentence => sentence.length > 10);
+            const summary = sentences.slice(0, 3).join(' ');
+            return {
+                answer: `Here is a quick summary of the uploaded document: ${summary}`,
+                citations: [{ text: context.slice(0, 280) }],
+            };
+        }
         if (this.isGeneralChatQuestion(question)) {
-            const greetingReply = question.toLowerCase().includes('thanks') || question.toLowerCase().includes('thank you')
+            const greetingReply = normalizedQuestion.includes('thanks') || normalizedQuestion.includes('thank you')
                 ? 'You are welcome! I am here to help with your documents and questions.'
                 : 'Hello! I can help answer questions about your uploaded documents and chat with you normally.';
             return { answer: greetingReply, citations: [] };
         }
-        const normalizedQuestion = question.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
-        const questionTokens = normalizedQuestion.split(/\s+/).filter(token => token.length > 2 && !LLMService.stopWords.has(token));
+        if (!context || !context.trim()) {
+            return {
+                answer: 'I do not have enough document content to answer that yet. Please upload a clearer document or ask a more specific question.',
+                citations: [],
+            };
+        }
+        const normalizedQuestionText = question.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
+        const questionTokens = normalizedQuestionText.split(/\s+/).filter(token => token.length > 2 && !LLMService.stopWords.has(token));
         const sentences = context
             .split(/(?<=[.!?])\s+/)
             .map(sentence => sentence.trim())
