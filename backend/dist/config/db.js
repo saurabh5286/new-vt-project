@@ -9,17 +9,16 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const connectDB = async (MONGO_URI) => {
     try {
-        const conn = await mongoose_1.default.connect(MONGO_URI);
+        await mongoose_1.default.connect(MONGO_URI);
         console.log(`MongoDB Connected`);
     }
     catch (error) {
         if (error instanceof Error) {
-            console.error(`Error: ${error.message}`);
+            console.error(`MongoDB connection failed: ${error.message}`);
         }
         else {
-            console.error(`Error: ${error}`);
+            console.error(`MongoDB connection failed: ${error}`);
         }
-        process.exit(1);
     }
 };
 exports.connectDB = connectDB;
