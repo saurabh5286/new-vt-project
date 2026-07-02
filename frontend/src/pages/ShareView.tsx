@@ -4,11 +4,6 @@ import { Sparkles, FileText, ArrowRight, Loader2 } from 'lucide-react'
 import api from '@/lib/api'
 
 interface Citation { text?: string; filename?: string }
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
-  citations?: Citation[]
-}
 
 interface ChatData {
   title: string

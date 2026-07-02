@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, type RefObject } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Send, Paperclip, Loader2, CheckCircle2, AlertCircle, FileText, Sparkles, Share2 } from 'lucide-react'
 import { useWorkspace } from '@/store/useWorkspace'
@@ -33,7 +33,7 @@ export default function Chat() {
   const [input, setInput] = useState('')
   const [showShareToast, setShowShareToast] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   const activeWorkspace = workspaces.find(w => w._id === selectedWorkspaceId)
 
@@ -53,7 +53,7 @@ export default function Chat() {
     if (urlWorkspaceId && urlWorkspaceId !== selectedWorkspaceId) {
       setSelectedWorkspaceId(urlWorkspaceId)
     } else if (!urlWorkspaceId && selectedWorkspaceId) {
-      setSearchParams({ workspaceId: selectedWorkspaceId }, { replace: true })
+      setSearchParams({ workspaceId: selectedWorkspaceId ?? undefined }, { replace: true })
     }
   }, [urlWorkspaceId, selectedWorkspaceId, setSearchParams, setSelectedWorkspaceId])
 
@@ -208,7 +208,7 @@ export default function Chat() {
                   await api.delete(`/chat/${chatId}`);
                   setMessages([]);
                   setChatId(null);
-                  setSearchParams({ workspaceId: selectedWorkspaceId }, { replace: true });
+                  setSearchParams({ workspaceId: selectedWorkspaceId ?? undefined }, { replace: true });
                 } catch (err) {
                   console.error('Failed to clear chat history', err);
                 }
@@ -396,7 +396,7 @@ function UploadStatus({ status }: { status: { name: string; status: string } }) 
 }
 
 interface ChatInputProps {
-  textareaRef: React.RefObject<HTMLTextAreaElement>
+  textareaRef: RefObject<HTMLTextAreaElement | null>
   input: string
   setInput: (v: string) => void
   onSend: () => void

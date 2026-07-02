@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 export interface User {
   id: string;
@@ -15,6 +15,10 @@ interface AuthState {
   logout: () => void;
 }
 
+const storage = typeof window !== 'undefined'
+  ? createJSONStorage(() => localStorage)
+  : undefined;
+
 export const useAuth = create<AuthState>()(
   persist(
     (set) => ({
@@ -26,7 +30,7 @@ export const useAuth = create<AuthState>()(
     {
       name: 'auth-storage',
       partialize: (state) => ({ user: state.user, token: state.token }),
-      storage: typeof window !== 'undefined' ? localStorage : undefined,
+      storage,
     }
   )
 );
