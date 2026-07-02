@@ -211,7 +211,11 @@ export default function Chat() {
                   setMessages([]);
                   setChatId(null);
                   const nextParams = new URLSearchParams(window.location.search)
-                  nextParams.set('workspaceId', selectedWorkspaceId)
+                  if (selectedWorkspaceId) {
+                    nextParams.set('workspaceId', selectedWorkspaceId)
+                  } else {
+                    nextParams.delete('workspaceId')
+                  }
                   setSearchParams(nextParams, { replace: true });
                 } catch (err) {
                   console.error('Failed to clear chat history', err);
