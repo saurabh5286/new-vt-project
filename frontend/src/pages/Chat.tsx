@@ -53,7 +53,9 @@ export default function Chat() {
     if (urlWorkspaceId && urlWorkspaceId !== selectedWorkspaceId) {
       setSelectedWorkspaceId(urlWorkspaceId)
     } else if (!urlWorkspaceId && selectedWorkspaceId) {
-      setSearchParams({ workspaceId: selectedWorkspaceId ?? undefined }, { replace: true })
+      const nextParams = new URLSearchParams(window.location.search)
+      nextParams.set('workspaceId', selectedWorkspaceId)
+      setSearchParams(nextParams, { replace: true })
     }
   }, [urlWorkspaceId, selectedWorkspaceId, setSearchParams, setSelectedWorkspaceId])
 
@@ -208,7 +210,9 @@ export default function Chat() {
                   await api.delete(`/chat/${chatId}`);
                   setMessages([]);
                   setChatId(null);
-                  setSearchParams({ workspaceId: selectedWorkspaceId ?? undefined }, { replace: true });
+                  const nextParams = new URLSearchParams(window.location.search)
+                  nextParams.set('workspaceId', selectedWorkspaceId)
+                  setSearchParams(nextParams, { replace: true });
                 } catch (err) {
                   console.error('Failed to clear chat history', err);
                 }

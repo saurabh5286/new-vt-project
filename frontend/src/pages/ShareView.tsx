@@ -3,8 +3,6 @@ import { useEffect, useState } from 'react'
 import { Sparkles, FileText, ArrowRight, Loader2 } from 'lucide-react'
 import api from '@/lib/api'
 
-interface Citation { text?: string; filename?: string }
-
 interface ChatData {
   title: string
   messages: {
