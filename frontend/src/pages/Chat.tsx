@@ -115,7 +115,10 @@ export default function Chat() {
       
       if (data.chatId && data.chatId !== chatId) {
         setChatId(data.chatId)
-        setSearchParams({ workspaceId: selectedWorkspaceId, chatId: data.chatId }, { replace: true })
+        const nextParams = new URLSearchParams(window.location.search)
+        nextParams.set('workspaceId', selectedWorkspaceId)
+        nextParams.set('chatId', data.chatId)
+        setSearchParams(nextParams, { replace: true })
       }
 
       setMessages(prev => [...prev, {
