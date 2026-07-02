@@ -29,6 +29,7 @@ export class DocumentProcessor {
           workspaceId,
           filename,
           chunkIndex: i,
+          extractedTextLength: text.length,
         }
       }));
 

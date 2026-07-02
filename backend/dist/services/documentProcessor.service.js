@@ -28,6 +28,7 @@ class DocumentProcessor {
                     workspaceId,
                     filename,
                     chunkIndex: i,
+                    extractedTextLength: text.length,
                 }
             }));
             llm_service_1.LLMService.storeWorkspaceContext(workspaceId, text, { documentId, filename, chunkCount: chunks.length });

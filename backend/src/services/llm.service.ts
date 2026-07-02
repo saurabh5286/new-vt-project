@@ -151,7 +151,7 @@ export class LLMService {
             messages: [
               {
                 role: 'system',
-                content: 'You are a helpful assistant for DocuMind AI. Answer the question directly using the provided context. Keep the answer concise and factual.',
+                content: 'You are a helpful assistant for DocuMind AI. Answer the question directly using the provided context. Use the most relevant details from the uploaded document, preserve facts, and be specific. If the answer is not in the document, say so clearly.',
               },
               {
                 role: 'user',
