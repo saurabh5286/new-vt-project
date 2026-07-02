@@ -5,7 +5,7 @@ const normalizeBaseUrl = () => {
   const configuredUrl = import.meta.env.VITE_API_URL?.trim()
 
   if (!configuredUrl) {
-    return import.meta.env.PROD ? '/api/v1' : 'http://localhost:5002/api/v1'
+    return import.meta.env.PROD ? 'https://new-vt-project-1.vercel.app/api/v1' : 'http://localhost:5002/api/v1'
   }
 
   if (configuredUrl.startsWith('/')) {
@@ -17,7 +17,17 @@ const normalizeBaseUrl = () => {
   }
 
   if (!configuredUrl.startsWith('http://') && !configuredUrl.startsWith('https://')) {
-    return `https://${configuredUrl}`.replace(/\/$/, '')
+    const normalizedValue = configuredUrl.replace(/^https?:\/\//i, '').replace(/\/$/, '')
+
+    if (normalizedValue === 'localhost' || normalizedValue === '127.0.0.1') {
+      return `http://${normalizedValue}:5002/api/v1`
+    }
+
+    if (!normalizedValue.includes('.') && !normalizedValue.includes('/')) {
+      return `https://${normalizedValue}.vercel.app/api/v1`
+    }
+
+    return `https://${normalizedValue}`.replace(/\/$/, '')
   }
 
   if (!configuredUrl.includes('/api/v1')) {
