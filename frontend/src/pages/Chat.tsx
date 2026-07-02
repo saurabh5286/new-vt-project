@@ -102,7 +102,7 @@ export default function Chat() {
 
   const sendMessage = async (text?: string) => {
     const question = (text ?? input).trim()
-    if (!question || loading || uploading) return
+    if (!question || loading) return
     const userMsg: Message = { id: Date.now().toString(), role: 'user', content: question }
     setMessages(prev => [...prev, userMsg])
     setInput('')
@@ -125,11 +125,14 @@ export default function Chat() {
           text: c.text
         })) || [],
       }])
-    } catch {
+    } catch (error: any) {
+      const backendMessage = error?.response?.data?.error || error?.message || ''
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: '⚠️ Could not connect to the AI service. Make sure Ollama is running locally.',
+        content: backendMessage
+          ? `⚠️ ${backendMessage}`
+          : '⚠️ Could not connect to the AI service. Make sure Ollama is running locally.',
       }])
     } finally {
       setLoading(false)
@@ -146,6 +149,7 @@ export default function Chat() {
     try {
       const { data } = await api.post('/documents/upload', formData)
       const docId = data.document.id
+      setUploading(false)
       const interval = setInterval(async () => {
         try {
           const res = await api.get(`/documents/${docId}/status`)
@@ -253,7 +257,7 @@ export default function Chat() {
                 input={input}
                 setInput={setInput}
                 onSend={() => sendMessage()}
-                onFileUpload={handleFileUpload}
+                        onFileUpload={handleFileUpload}
                 uploading={uploading}
                 loading={loading}
                 disabled={!selectedWorkspaceId}
@@ -404,7 +408,7 @@ interface ChatInputProps {
 }
 
 function ChatInput({ textareaRef, input, setInput, onSend, onFileUpload, uploading, loading, disabled, placeholder }: ChatInputProps) {
-  const canSend = input.trim() && !loading && !uploading && !disabled
+  const canSend = input.trim() && !loading && !disabled
   return (
     <div className={`flex items-end gap-2 rounded-2xl border bg-white px-3 py-2 shadow-sm transition-all ${
       disabled ? 'opacity-60 border-slate-200' : 'border-slate-200 hover:border-violet-300 focus-within:border-violet-400 focus-within:ring-4 focus-within:ring-violet-100'
@@ -427,7 +431,7 @@ function ChatInput({ textareaRef, input, setInput, onSend, onFileUpload, uploadi
         onChange={e => setInput(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend() } }}
         placeholder={placeholder}
-        disabled={loading || uploading || disabled}
+        disabled={loading || disabled}
         rows={1}
         className="flex-1 bg-transparent resize-none outline-none text-sm leading-6 text-slate-700 placeholder-slate-400 disabled:opacity-50 max-h-[180px] py-1.5"
       />

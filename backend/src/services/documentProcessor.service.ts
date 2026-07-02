@@ -32,6 +32,8 @@ export class DocumentProcessor {
         }
       }));
 
+      LLMService.storeWorkspaceContext(workspaceId, text, { documentId, filename, chunkCount: chunks.length });
+
       // 5. Embed and store in Qdrant
       await LLMService.processAndStoreChunks(workspaceId, chunksWithMeta);
 

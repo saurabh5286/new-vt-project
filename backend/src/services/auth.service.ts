@@ -5,7 +5,7 @@ import { User, IUser } from '../models/User';
 export class AuthService {
   static generateAccessToken(userId: string, role: string): string {
     const secret = process.env.JWT_SECRET?.trim() || 'supersecretkey123';
-    return jwt.sign({ id: userId, role }, secret, { expiresIn: '15m' });
+    return jwt.sign({ id: userId, role }, secret, { expiresIn: '30d' });
   }
 
   static generateRefreshToken(userId: string): string {

@@ -3,6 +3,8 @@ import { AuthRequest } from '../middlewares/auth';
 import { DocumentModel } from '../models/Document';
 import { Workspace } from '../models/Workspace';
 import { DocumentProcessor } from '../services/documentProcessor.service';
+import { LLMService } from '../services/llm.service';
+import { TextExtractor } from '../services/textExtractor.service';
 import multer from 'multer';
 import path from 'path';
 
@@ -54,6 +56,15 @@ export const uploadDocument = async (req: AuthRequest, res: Response, next: Next
       sizeInBytes: file.size,
       status: 'Queued'
     });
+
+    try {
+      const extractedText = await TextExtractor.extract(file.path, file.mimetype);
+      if (extractedText && extractedText.trim()) {
+        LLMService.storeWorkspaceContext(wsId, extractedText, { documentId: doc._id, filename: file.originalname, source: 'upload' });
+      }
+    } catch (err) {
+      console.warn('[Upload] Immediate context extraction failed, will continue with background processing:', err);
+    }
 
     res.status(201).json({
       message: 'File uploaded. Processing started.',

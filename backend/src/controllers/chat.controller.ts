@@ -38,26 +38,11 @@ export const sendMessage = async (req: AuthRequest, res: Response, next: NextFun
     chat.messages.push({ role: 'user', content: question, timestamp: new Date() });
     await chat.save();
 
-    // Generate AI answer from workspace documents with timeout
-    // Wrap the whole answer generation in a top‑level try/catch so any unexpected error is logged
-    const generateWithTimeout = async () => {
-      try {
-        return await Promise.race([
-          LLMService.generateAnswer(wsId, question),
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('LLM generation timeout')), 15000)),
-        ]);
-      } catch (outerErr) {
-        console.error('[Chat] Unexpected error during answer generation:', outerErr);
-        // Propagate a generic error to the client
-        throw new Error('Failed to generate answer');
-      }
-    };
-
     let answerResult;
     try {
-      answerResult = await generateWithTimeout();
+      answerResult = await LLMService.generateAnswer(wsId, question);
     } catch (err: any) {
-      console.error('[Chat] generateWithTimeout threw:', err);
+      console.error('[Chat] Answer generation threw:', err);
       return res.status(500).json({ error: err.message || 'Chat generation failed' });
     }
     const { answer, citations } = answerResult;

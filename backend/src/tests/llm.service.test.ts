@@ -26,4 +26,16 @@ describe('LLMService integration test (mocked)', () => {
     expect(mockedOllama.prototype.embed).toHaveBeenCalled();
     expect(mockedVectorService.queryVectors).toHaveBeenCalledWith('workspace123', expect.any(Array), 8);
   });
+
+  it('should answer from workspace context immediately when available', async () => {
+    mockedVectorService.queryVectors = jest.fn().mockResolvedValue([]);
+    mockedOllama.prototype.chat = jest.fn().mockResolvedValue({ message: { content: 'Answer from uploaded document' } });
+
+    LLMService.storeWorkspaceContext('workspace123', 'The uploaded document says the answer is 42.');
+
+    const result = await LLMService.generateAnswer('workspace123', 'What does the document say?');
+
+    expect(result.answer).toBe('Answer from uploaded document');
+    expect(mockedVectorService.queryVectors).not.toHaveBeenCalled();
+  });
 });
