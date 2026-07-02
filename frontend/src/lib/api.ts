@@ -1,8 +1,34 @@
 import axios from 'axios'
 import { useAuth } from '@/store/useAuth'
 
+const normalizeBaseUrl = () => {
+  const configuredUrl = import.meta.env.VITE_API_URL?.trim()
+
+  if (!configuredUrl) {
+    return import.meta.env.PROD ? '/api/v1' : 'http://localhost:5002/api/v1'
+  }
+
+  if (configuredUrl.startsWith('/')) {
+    return configuredUrl
+  }
+
+  if (configuredUrl.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
+    return configuredUrl.replace(/^http:\/\//i, 'https://')
+  }
+
+  if (!configuredUrl.startsWith('http://') && !configuredUrl.startsWith('https://')) {
+    return `https://${configuredUrl}`.replace(/\/$/, '')
+  }
+
+  if (!configuredUrl.includes('/api/v1')) {
+    return `${configuredUrl.replace(/\/$/, '')}/api/v1`
+  }
+
+  return configuredUrl.replace(/\/$/, '')
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
+  baseURL: normalizeBaseUrl(),
   withCredentials: true,
 })
 
