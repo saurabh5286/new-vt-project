@@ -1,6 +1,5 @@
 import { app } from "./app";
 import { connectDB } from "./config/db";
-import "./queues/document.queue";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,6 +11,8 @@ const startServer = async () => {
   await connectDB(mongo_uri);
 };
 
-startServer();
+if (process.env.NODE_ENV !== 'production') {
+  startServer();
+}
 
 export default app;
