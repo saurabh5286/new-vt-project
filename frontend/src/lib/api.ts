@@ -3,38 +3,52 @@ import { useAuth } from '@/store/useAuth'
 
 const normalizeBaseUrl = () => {
   const configuredUrl = import.meta.env.VITE_API_URL?.trim()
+  const fallbackProdUrl = 'https://new-vt-project-1.vercel.app/api/v1'
 
   if (!configuredUrl) {
-    return import.meta.env.PROD ? 'https://new-vt-project-1.vercel.app/api/v1' : 'http://localhost:5002/api/v1'
+    return import.meta.env.PROD ? fallbackProdUrl : 'http://localhost:5002/api/v1'
   }
 
   if (configuredUrl.startsWith('/')) {
     return configuredUrl
   }
 
-  if (configuredUrl.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
-    return configuredUrl.replace(/^http:\/\//i, 'https://')
-  }
+  const trimmedUrl = configuredUrl.replace(/\/$/, '')
 
-  if (!configuredUrl.startsWith('http://') && !configuredUrl.startsWith('https://')) {
-    const normalizedValue = configuredUrl.replace(/^https?:\/\//i, '').replace(/\/$/, '')
+  if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
+    try {
+      const parsed = new URL(trimmedUrl)
+      const hostname = parsed.hostname.toLowerCase()
 
-    if (normalizedValue === 'localhost' || normalizedValue === '127.0.0.1') {
-      return `http://${normalizedValue}:5002/api/v1`
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return `http://${hostname}:5002/api/v1`
+      }
+
+      if (!hostname.includes('.')) {
+        parsed.hostname = `${hostname}.vercel.app`
+      }
+
+      if (!parsed.pathname.includes('/api/v1')) {
+        parsed.pathname = `${parsed.pathname.replace(/\/$/, '')}/api/v1`
+      }
+
+      return parsed.toString().replace(/\/$/, '')
+    } catch {
+      return fallbackProdUrl
     }
-
-    if (!normalizedValue.includes('.') && !normalizedValue.includes('/')) {
-      return `https://${normalizedValue}.vercel.app/api/v1`
-    }
-
-    return `https://${normalizedValue}`.replace(/\/$/, '')
   }
 
-  if (!configuredUrl.includes('/api/v1')) {
-    return `${configuredUrl.replace(/\/$/, '')}/api/v1`
+  const normalizedValue = trimmedUrl.replace(/^https?:\/\//i, '')
+
+  if (normalizedValue === 'localhost' || normalizedValue === '127.0.0.1') {
+    return `http://${normalizedValue}:5002/api/v1`
   }
 
-  return configuredUrl.replace(/\/$/, '')
+  if (!normalizedValue.includes('.') && !normalizedValue.includes('/') && !normalizedValue.includes(':')) {
+    return `https://${normalizedValue}.vercel.app/api/v1`
+  }
+
+  return `https://${normalizedValue}`.replace(/\/$/, '')
 }
 
 const api = axios.create({

@@ -14,10 +14,22 @@ const workspace_routes_1 = __importDefault(require("./routes/workspace.routes"))
 const errorHandler_1 = require("./middlewares/errorHandler");
 const app = (0, express_1.default)();
 exports.app = app;
+const allowedOrigins = [
+    process.env.CLIENT_URL,
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://new-vt-project-2.vercel.app',
+].filter(Boolean);
 // Global Middlewares
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+            return;
+        }
+        callback(new Error(`Origin not allowed: ${origin}`));
+    },
     credentials: true,
 }));
 app.use(express_1.default.json());
